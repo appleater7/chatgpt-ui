@@ -1,7 +1,7 @@
 export interface ChatMessage {
   id: number;
   content: string;
-  sender: 'user' | 'ai';
+  sender: "user" | "ai";
   timestamp: Date;
   conversationId: number;
 }
@@ -21,4 +21,21 @@ export interface FeatureCard {
   description: string;
   imageUrl: string;
   altText: string;
+}
+
+export interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: string;
+}
+
+export interface ChatInputProps {
+  onSendMessage: (message: string) => void;
+  disabled?: boolean;
+}
+
+export interface ChatMessagesProps {
+  messages: Message[];
+  isTyping?: boolean;
 }
