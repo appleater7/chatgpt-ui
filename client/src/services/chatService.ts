@@ -133,20 +133,24 @@ export class ChatService {
       
       if (Array.isArray(data)) {
         return data.map(item => {
-          if (item.timestamp) {
-            item.timestamp = new Date(item.timestamp);
+          if (item.timestamp && typeof item.timestamp === 'string') {
+            const parsedDate = new Date(item.timestamp);
+            item.timestamp = isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
           }
-          if (item.createdAt) {
-            item.createdAt = new Date(item.createdAt);
+          if (item.createdAt && typeof item.createdAt === 'string') {
+            const parsedDate = new Date(item.createdAt);
+            item.createdAt = isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
           }
           return item;
         }) as T;
       } else if (typeof data === 'object' && data !== null) {
-        if (data.timestamp) {
-          data.timestamp = new Date(data.timestamp);
+        if (data.timestamp && typeof data.timestamp === 'string') {
+          const parsedDate = new Date(data.timestamp);
+          data.timestamp = isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
         }
-        if (data.createdAt) {
-          data.createdAt = new Date(data.createdAt);
+        if (data.createdAt && typeof data.createdAt === 'string') {
+          const parsedDate = new Date(data.createdAt);
+          data.createdAt = isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
         }
       }
       

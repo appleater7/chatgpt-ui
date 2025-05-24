@@ -13,9 +13,11 @@ interface InsertMessage {
 
 export class MockApiService {
   private chatService = chatService;
+  private cacheInvalidationCallback?: () => void;
   
-  constructor() {
+  constructor(cacheInvalidationCallback?: () => void) {
     this.chatService.initializeWithSampleData();
+    this.cacheInvalidationCallback = cacheInvalidationCallback;
   }
   
   async getConversations(): Promise<Conversation[]> {
@@ -50,6 +52,10 @@ export class MockApiService {
           sender: "ai",
           conversationId: data.conversationId
         });
+        
+        if (this.cacheInvalidationCallback) {
+          this.cacheInvalidationCallback();
+        }
       }, 1500);
     }
     
