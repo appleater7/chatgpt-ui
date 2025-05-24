@@ -1,13 +1,13 @@
 import React, { useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChatMessage } from "@/types";
+import { Message } from "@/types";
 import { format } from "date-fns";
 import { User, Bot } from "lucide-react";
 import TypingIndicator from "./TypingIndicator";
 import { cn } from "@/lib/utils";
 
 interface ChatMessagesProps {
-  messages: ChatMessage[];
+  messages: Message[];
   isTyping: boolean;
 }
 
