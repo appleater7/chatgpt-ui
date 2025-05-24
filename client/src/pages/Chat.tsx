@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Header } from "@/components/Header";
-import { ChatMessages } from "@/components/ChatMessages";
-import { ChatInput } from "@/components/ChatInput";
+import ChatHeader from "@/components/ChatHeader";
+import ChatMessages from "@/components/ChatMessages";
+import ChatInput from "@/components/ChatInput";
 import { Message, ChatMessage } from "@/types";
 import { chatService } from "../../services/chatService";
 
@@ -158,7 +158,7 @@ const Chat: React.FC = () => {
   console.log("Passing to ChatMessages:", JSON.stringify(messages, null, 2));
   return (
     <div className="flex flex-col h-screen bg-background">
-      <Header />
+      <ChatHeader />
       <main className="flex-1 overflow-y-auto" id="chat-container">
         <ChatMessages messages={messages} isTyping={isTyping} />
       </main>
