@@ -1,12 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { ChatMessages } from "@/components/ChatMessages";
 import { ChatInput } from "@/components/ChatInput";
-import { Message } from "@/types";
+import { Message, ChatMessage } from "@/types";
+import { chatService } from "../../services/chatService";
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const loadMessages = async () => {
+      let conversations = await chatService.getAllConversations();
+
+      if (conversations.length === 0) {
+        await chatService.initializeWithSampleData();
+        conversations = await chatService.getAllConversations();
+        if (conversations.length === 0) {
+          console.error("Failed to load conversations even after initialization.");
+          // Optionally, display an empty chat or a specific message to the user
+          return;
+        }
+      }
+
+      const firstConversation = conversations[0];
+      setCurrentConversationId(firstConversation.id); // Set currentConversationId
+      const chatMessages = await chatService.getMessagesForConversation(firstConversation.id);
+
+      const transformedMessages: Message[] = chatMessages.map((chatMessage: ChatMessage) => ({
+        id: chatMessage.id.toString(),
+        role: chatMessage.sender === 'ai' ? 'assistant' : 'user',
+        content: chatMessage.content,
+        timestamp: chatMessage.timestamp.toISOString(),
+      }));
+
+      setMessages(transformedMessages);
+    };
+
+    loadMessages();
+  }, []);
 
   const handleSendMessage = async (content: string) => {
     // 사용자 메시지 추가
@@ -19,6 +52,22 @@ const Chat: React.FC = () => {
 
     setMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
+
+    let conversationIdToUse = currentConversationId;
+
+    if (!conversationIdToUse) {
+      const newConversation = await chatService.createConversation({ title: 'New Conversation' });
+      setCurrentConversationId(newConversation.id);
+      conversationIdToUse = newConversation.id;
+    }
+
+    if (conversationIdToUse) {
+      await chatService.createMessage({
+        content: userMessage.content,
+        sender: 'user',
+        conversationId: conversationIdToUse,
+      });
+    }
 
     try {
       const response = await fetch("/api/chat", {
@@ -44,6 +93,13 @@ const Chat: React.FC = () => {
       };
 
       setMessages((prev) => [...prev, aiMessage]);
+      if (conversationIdToUse) {
+        await chatService.createMessage({
+          content: aiMessage.content,
+          sender: 'ai',
+          conversationId: conversationIdToUse,
+        });
+      }
     } catch (error) {
       console.error("Error sending message:", error);
 
@@ -56,6 +112,14 @@ const Chat: React.FC = () => {
       };
 
       setMessages((prev) => [...prev, errorMessage]);
+      if (conversationIdToUse) {
+        // Also save error messages if needed, or decide how to handle them
+        await chatService.createMessage({
+          content: errorMessage.content,
+          sender: 'ai', // Or 'system' if you want to differentiate
+          conversationId: conversationIdToUse,
+        });
+      }
     } finally {
       setIsTyping(false);
     }
