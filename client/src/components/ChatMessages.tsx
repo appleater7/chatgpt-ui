@@ -43,7 +43,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isTyping }) => {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto p-4">
       <AnimatePresence>
         {messages.map((message) => (
           <motion.div
@@ -58,7 +58,10 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isTyping }) => {
               message.role === "user" ? "bg-background" : "bg-muted/30"
             )}
           >
-            <div className="max-w-3xl mx-auto flex items-start gap-4">
+            <div className={cn(
+              "max-w-3xl mx-auto flex items-start gap-4",
+              message.role === "user" ? "flex-row-reverse" : "flex-row"
+            )}>
               <div
                 className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
@@ -72,14 +75,25 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isTyping }) => {
                 )}
               </div>
 
-              <div className="flex-1">
+              <div className={cn(
+                "flex-1",
+                message.role === "user" ? "text-right" : "text-left"
+              )}>
                 <div className="font-medium text-foreground mb-1">
                   {message.role === "user" ? "You" : "ChatGPT"}
                 </div>
-                <div className="text-foreground whitespace-pre-wrap">
+                <div className={cn(
+                  "text-foreground whitespace-pre-wrap rounded-lg p-3",
+                  message.role === "user" 
+                    ? "bg-blue-500 text-white ml-auto max-w-[80%]" 
+                    : "bg-muted/50 mr-auto max-w-[80%]"
+                )}>
                   {message.content}
                 </div>
-                <div className="text-xs text-muted-foreground mt-2">
+                <div className={cn(
+                  "text-xs text-muted-foreground mt-2",
+                  message.role === "user" ? "text-right" : "text-left"
+                )}>
                   {formatTime(message.timestamp)}
                 </div>
               </div>
@@ -102,8 +116,10 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isTyping }) => {
               </div>
 
               <div className="flex-1">
-                <div className="font-medium text-foreground">ChatGPT</div>
-                <TypingIndicator />
+                <div className="font-medium text-foreground mb-1">ChatGPT</div>
+                <div className="bg-muted/50 rounded-lg p-3 max-w-[80%]">
+                  <TypingIndicator />
+                </div>
               </div>
             </div>
           </motion.div>

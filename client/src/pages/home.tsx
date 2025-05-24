@@ -167,7 +167,7 @@ const Home: React.FC = () => {
           isSidebarOpen={isSidebarOpen}
         />
         
-        <main className="flex-1 overflow-y-auto" id="chat-container">
+        <main className="flex-1 overflow-y-auto bg-background" id="chat-container">
           {showWelcomeScreen ? (
             <WelcomeScreen 
               featureCards={featureCards}
