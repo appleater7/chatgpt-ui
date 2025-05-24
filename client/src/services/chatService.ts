@@ -66,9 +66,12 @@ export class ChatService {
 
   getMessagesForConversation(conversationId: number): ChatMessage[] {
     const messages = this.loadFromStorage<ChatMessage[]>(ChatService.MESSAGES_KEY) || [];
-    return messages
+    console.log('[ChatService] Messages before filtering for conversationId ' + conversationId + ':', JSON.stringify(messages, null, 2));
+    const resultMessages = messages
       .filter(msg => msg.conversationId === conversationId)
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    console.log('[ChatService] Messages returned by getMessagesForConversation for conversationId ' + conversationId + ':', JSON.stringify(resultMessages, null, 2));
+    return resultMessages;
   }
 
   createMessage(message: InsertMessage): ChatMessage {
@@ -80,9 +83,11 @@ export class ChatService {
       id,
       timestamp
     };
+    console.log('[ChatService] Creating new message (before saving):', JSON.stringify(newMessage, null, 2));
     
     const messages = this.loadFromStorage<ChatMessage[]>(ChatService.MESSAGES_KEY) || [];
     messages.push(newMessage);
+    console.log('[ChatService] All messages before saving to localStorage in createMessage:', JSON.stringify(messages, null, 2));
     this.saveToStorage(ChatService.MESSAGES_KEY, messages);
     
     return newMessage;
@@ -125,11 +130,13 @@ export class ChatService {
     
     try {
       const serialized = localStorage.getItem(key);
+      if (key === ChatService.MESSAGES_KEY) { console.log('[ChatService] Raw string from localStorage for messages:', serialized); }
       if (serialized === null) {
         return null;
       }
       
       const data = JSON.parse(serialized);
+      if (key === ChatService.MESSAGES_KEY) { console.log('[ChatService] Parsed messages from localStorage:', JSON.stringify(data, null, 2)); }
       
       if (Array.isArray(data)) {
         return data.map(item => {

@@ -28,12 +28,42 @@ const Chat: React.FC = () => {
       setCurrentConversationId(firstConversation.id); // Set currentConversationId
       const chatMessages = await chatService.getMessagesForConversation(firstConversation.id);
 
-      const transformedMessages: Message[] = chatMessages.map((chatMessage: ChatMessage) => ({
-        id: chatMessage.id.toString(),
-        role: chatMessage.sender === 'ai' ? 'assistant' : 'user',
-        content: chatMessage.content,
-        timestamp: chatMessage.timestamp.toISOString(),
-      }));
+      const transformedMessages: Message[] = chatMessages.map((chatMessage: ChatMessage) => {
+        let id: string;
+        if (chatMessage.id !== undefined && chatMessage.id !== null) {
+          id = chatMessage.id.toString();
+        } else {
+          id = Math.random().toString();
+          console.warn("ChatMessage missing id", chatMessage);
+        }
+
+        let role: 'user' | 'assistant';
+        if (chatMessage.sender === 'ai') {
+          role = 'assistant';
+        } else if (chatMessage.sender === 'user') {
+          role = 'user';
+        } else {
+          role = 'user'; // Default role
+          console.warn(`Invalid or missing sender: '${chatMessage.sender}' for message ID ${id}. Defaulting role to 'user'.`, chatMessage);
+        }
+
+        const content: string = chatMessage.content ?? "[Message content is missing]";
+
+        let timestamp: string;
+        if (chatMessage.timestamp && chatMessage.timestamp instanceof Date && !isNaN(chatMessage.timestamp.getTime())) {
+          timestamp = chatMessage.timestamp.toISOString();
+        } else {
+          timestamp = new Date().toISOString();
+          console.warn(`Invalid or missing timestamp for message ID ${id}. Defaulting to current time.`, chatMessage);
+        }
+
+        return {
+          id,
+          role,
+          content,
+          timestamp,
+        };
+      });
 
       setMessages(transformedMessages);
     };
@@ -125,6 +155,7 @@ const Chat: React.FC = () => {
     }
   };
 
+  console.log("Passing to ChatMessages:", JSON.stringify(messages, null, 2));
   return (
     <div className="flex flex-col h-screen bg-background">
       <Header />
