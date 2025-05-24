@@ -65,7 +65,9 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isTyping }) => {
                   {message.content}
                 </div>
                 <div className="text-xs opacity-70 mt-2">
-                  {format(message.timestamp, 'h:mm a')}
+                  {message.timestamp && !isNaN(new Date(message.timestamp).getTime()) 
+                    ? format(message.timestamp, 'h:mm a') 
+                    : 'Invalid time'}
                 </div>
               </div>
             </div>

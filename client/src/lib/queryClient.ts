@@ -1,7 +1,17 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
-import { mockApiService } from "../services/mockApiService";
+import { MockApiService } from "../services/mockApiService";
 
 const USE_LOCAL_STORAGE = true;
+
+let globalQueryClient: QueryClient | null = null;
+
+const mockApiService = new MockApiService(() => {
+  if (globalQueryClient) {
+    globalQueryClient.invalidateQueries({ 
+      queryKey: ['/api/conversations'] 
+    });
+  }
+});
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -154,6 +164,9 @@ export const getQueryFn: <T>(options: {
   };
 
 export const queryClient = new QueryClient({
+  onCreated: (client) => {
+    globalQueryClient = client;
+  },
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
